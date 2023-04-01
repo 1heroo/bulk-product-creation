@@ -116,6 +116,7 @@ class CreationUtils(BaseUtils):
             obj = {
                 'Номер карточки': product['detail'].get('id'),
                 'Предмет': product['card']['subj_name'],
+                'subj_root_name': product['card'].get('subj_root_name'),
                 'Цвет': None,
                 'Бренд': product['detail'].get('brand'),
                 'Пол': None,
