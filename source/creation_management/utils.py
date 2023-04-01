@@ -109,9 +109,12 @@ class CreationUtils(BaseUtils):
             for option in product['card'].get('options'):
                 options_dict.update({option.get('name'): option.get('value').split(' ')[0]})
 
+            photo_count = product['card']['media'].get('photo_count', 2)
+            photo_count = 2 if photo_count == 1 else photo_count
+
             images_url = '; '.join([
                 make_head(int(product['detail'].get('id'))) + make_tail(str(product['detail'].get('id')), f'images/big/{image_count}.jpg')
-                for image_count in range(1, product['card']['media'].get('photo_count', 2))
+                for image_count in range(1, photo_count)
             ])
             obj = {
                 'Номер карточки': product['detail'].get('id'),
