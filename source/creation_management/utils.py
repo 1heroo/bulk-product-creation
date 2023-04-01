@@ -119,7 +119,7 @@ class CreationUtils(BaseUtils):
                 'Цвет': None,
                 'Бренд': product['detail'].get('brand'),
                 'Пол': None,
-                'Название': product['detail'].get('name'),
+                'Название': product['detail'].get('name')[:60],
                 'Артикул продавца': 'bland' + product['card'].get('vendor_code', ''),
                 'Баркод товара': None,
                 'Цена': price,
