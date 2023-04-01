@@ -11,8 +11,7 @@ class CreationServices:
         self.creation_utils = CreationUtils()
 
     async def prepare_to_creation_management(
-            self, df: pd.DataFrame, article_column: str, price_column: str, brand_id: int) -> list[str]:
-        products = await self.creation_utils.get_products(brand_ids=[brand_id])
+            self, df: pd.DataFrame, products: list[dict], article_column: str, price_column: str) -> list[str]:
         products_df = pd.DataFrame([
             {'vendor_code': product['card'].get('vendor_code'), 'product': product}
             for product in products
