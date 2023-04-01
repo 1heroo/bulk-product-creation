@@ -19,9 +19,9 @@ creation_services = CreationServices()
 async def create_kts(brand_id: int, file: bytes = File()):
 
     df = pd.read_excel(file)
-
     article_column = df['Артикул WB'].name
     price_column = df['Минимальная цена'].name
+    df = df.drop_duplicates(subset=[article_column])
 
     if article_column is None:
         return JSONResponse(content={'message': 'Не правильная струкутра в экзель'},
