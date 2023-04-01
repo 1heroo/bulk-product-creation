@@ -27,8 +27,9 @@ class CreationServices:
                     + '_' + \
                     str(datetime.date.today()) + '.xlsx'
 
-        output_products_df.to_excel(products_filename, index=False)
         output_products_df.drop_duplicates(subset=['Артикул продавца'])
+        output_products_df.to_excel(products_filename, index=False)
+
 
         excluded_df = self.creation_utils.excluded_df(
             initial_df=df, products_df=products_df, article_column=article_column)
