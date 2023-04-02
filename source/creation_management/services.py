@@ -16,7 +16,7 @@ class CreationServices:
             {'vendor_code': product['card'].get('vendor_code'), 'product': product}
             for product in products
         ])
-
+        df[article_column] = df[article_column].apply(func=lambda item: str(item))
         final_df = pd.merge(df, products_df, how='inner', left_on=article_column, right_on='vendor_code')
         products = final_df.to_dict('records')
         output_products_df = pd.DataFrame(
