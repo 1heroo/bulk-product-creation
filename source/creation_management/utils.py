@@ -129,24 +129,30 @@ class CreationUtils(BaseUtils):
 
             options_dict = dict()
 
-            for option in product['card'].get('options'):
+            for option in product['card'].get('options', []):
                 options_dict.update({option.get('name'): option.get('value').split(' ')[0]})
 
-            photo_count = product['card']['media'].get('photo_count', 2)
-            photo_count = 2 if photo_count == 1 else photo_count
+            media = product['card'].get('media', '')
+            if media:
+                photo_count = product['card']['media'].get('photo_count', 2)
+                photo_count = 2 if photo_count == 1 else photo_count
 
-            images_url = '; '.join([
-                make_head(int(product['detail'].get('id'))) + make_tail(str(product['detail'].get('id')), f'images/big/{image_count}.jpg')
-                for image_count in range(1, photo_count)
-            ])
+                images_url = '; '.join([
+                    make_head(int(product['detail'].get('id'))) + make_tail(str(product['detail'].get('id')),
+                                                                            f'images/big/{image_count}.jpg')
+                    for image_count in range(1, photo_count)
+                ])
+            else:
+                images_url = None
+
             obj = {
                 'Номер карточки': product['detail'].get('id'),
-                'Предмет': product['card']['subj_name'],
+                'Предмет': product['card'].get('subj_name'),
                 'subj_root_name': product['card'].get('subj_root_name'),
                 'Цвет': None,
                 'Бренд': product['detail'].get('brand'),
                 'Пол': None,
-                'Название': product['detail'].get('name')[:60],
+                'Название': product['detail'].get('name', '')[:60],
                 'Артикул продавца': 'bland' + product['card'].get('vendor_code', ''),
                 'Баркод товара': None,
                 'Цена': price,
@@ -160,7 +166,7 @@ class CreationUtils(BaseUtils):
 
     @staticmethod
     def excluded_df(initial_df: pd.DataFrame, products_df: pd.DataFrame, article_column: str):
-        print(products_df)
+
         return pd.merge(
             initial_df, products_df,  left_on=article_column, right_on='vendor_code', how="outer", indicator=True)\
             .query('_merge=="left_only"')

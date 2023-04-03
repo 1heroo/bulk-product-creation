@@ -11,12 +11,22 @@ class CreationServices:
         self.creation_utils = CreationUtils()
 
     async def prepare_to_creation_management(
-            self, df: pd.DataFrame, products: list[dict], article_column: str, price_column: str) -> list[str]:
+            self, df: pd.DataFrame,
+            products: list[dict],
+            article_column: str,
+            price_column: str,
+            prefix: str = None
+    ) -> list[str]:
+
         products_df = pd.DataFrame([
             {'vendor_code': product['card'].get('vendor_code'), 'product': product}
             for product in products
         ])
         df[article_column] = df[article_column].apply(func=lambda item: str(item))
+
+        if prefix is not None:
+            products_df['vendor_code'] = products_df['vendor_code'].apply(func=lambda item: str(item).split(prefix)[-1])
+
         final_df = pd.merge(df, products_df, how='inner', left_on=article_column, right_on='vendor_code')
         products = final_df.to_dict('records')
         output_products_df = pd.DataFrame(
@@ -38,3 +48,13 @@ class CreationServices:
 
         excluded_df.to_excel(excluded_filename, index=False)
         return [excluded_filename, products_filename]
+
+    async def prepare_to_creation_by_seller_products(self, products: list[dict]) -> pd.DataFrame:
+        products = [
+            {'product': product, 'price': product['detail'].get('priceU')}
+            for product in products
+        ]
+
+        return pd.DataFrame(
+            self.creation_utils.prepare_output_to_creation(products=products, price_column='price'))
+
