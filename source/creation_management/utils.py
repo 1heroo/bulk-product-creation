@@ -66,10 +66,13 @@ class CreationUtils(BaseUtils):
             detail = {}
         # seller_url = make_head(int(article)) + make_tail(str(article), 'sellers.json')
         # seller_data = await self.make_get_request(seller_url, headers={})
+        qnt_url = f'https://product-order-qnt.wildberries.ru/by-nm/?nm={article}'
+        qnt = await self.make_get_request(url=qnt_url, headers={})
 
         obj.update({
             'card': card if card else {},
             'detail': detail[0] if detail else {},
+            'qnt': qnt if qnt else {}
             # 'seller': seller_data if seller_data else {}
         })
 
@@ -117,8 +120,6 @@ class CreationUtils(BaseUtils):
         output_data = [item for item in output_data if not isinstance(item, Exception) and item]
         return output_data
 
-
-
     @staticmethod
     def prepare_output_to_creation(products: list[dict], price_column: str) -> list[dict]:
         output_data = []
@@ -128,8 +129,12 @@ class CreationUtils(BaseUtils):
             price = item.get(price_column, 0)
 
             options_dict = dict()
+            options = product['card'].get('options', [])
 
-            for option in product['card'].get('options', []):
+            for grouped_option in product['card'].get('grouped_options', []):
+                options += grouped_option.get('options', [])
+
+            for option in options:
                 options_dict.update({option.get('name'): option.get('value').split(' ')[0]})
 
             media = product['card'].get('media', '')
@@ -170,6 +175,24 @@ class CreationUtils(BaseUtils):
         return pd.merge(
             initial_df, products_df,  left_on=article_column, right_on='vendor_code', how="outer", indicator=True)\
             .query('_merge=="left_only"')
+
+    @staticmethod
+    def sort_products_by_sales(products: list[dict]) -> list[dict]:
+        products_dict = dict()
+        output_data = []
+
+        for product in products:
+            vendorCode = product['card'].get('vendor_code')
+            if products_dict.get(vendorCode):
+                products_dict[vendorCode].append(product)
+            else:
+                products_dict[vendorCode] = [product]
+
+        for key, product_list in products_dict.items():
+            output_data.append(
+                max(product_list, key=lambda item: item['qnt'][0].get('qnt', 0))
+            )
+        return output_data
 
 
 def make_head(article: int):

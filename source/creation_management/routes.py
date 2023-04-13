@@ -26,7 +26,8 @@ async def create_kts(brand_id: int, file: bytes = File()):
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     products = await creation_services.creation_utils.get_products(brand_ids=[brand_id])
-
+    print(len(products))
+    products = creation_services.creation_utils.sort_products_by_sales(products=products)
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
         df=df, article_column=article_column, price_column=price_column)
