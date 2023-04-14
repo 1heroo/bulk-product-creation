@@ -194,6 +194,23 @@ class CreationUtils(BaseUtils):
             )
         return output_data
 
+    @staticmethod
+    def merge_products_and_return_df(df: pd.DataFrame, products: list[dict],
+                                     article_column: str, price_column: str) -> pd.DataFrame:
+        output_data = []
+        for index in df.index:
+            vendor_code = df[article_column][index]
+            for product in products:
+                if vendor_code in product['card'].get('vendor_code', ''):
+                    output_data.append({
+                        'Артикул WB': vendor_code,
+                        'Минимальная цена': df[price_column][index],
+                        'vendor_code': product['card'].get('vendor_code', ''),
+                        'product': product,
+                    })
+        return pd.DataFrame(output_data)
+
+
 
 def make_head(article: int):
     head = 'https://basket-{i}.wb.ru'

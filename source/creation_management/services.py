@@ -27,7 +27,12 @@ class CreationServices:
         if prefix is not None:
             products_df['vendor_code'] = products_df['vendor_code'].apply(func=lambda item: str(item).split(prefix)[-1])
 
-        final_df = pd.merge(df, products_df, how='inner', left_on=article_column, right_on='vendor_code')
+        # final_df = pd.merge(df, products_df, how='inner', left_on=article_column, right_on='vendor_code')
+        final_df = self.creation_utils.merge_products_and_return_df(
+            df=df, products=products, article_column=article_column, price_column=price_column)
+
+        print(final_df)
+        print(final_df.columns)
         products = final_df.to_dict('records')
         output_products_df = pd.DataFrame(
             self.creation_utils.prepare_output_to_creation(products=products, price_column=price_column))
