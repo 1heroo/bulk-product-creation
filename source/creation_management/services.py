@@ -15,9 +15,10 @@ class CreationServices:
             products: list[dict],
             article_column: str,
             price_column: str,
-            prefix: str = None
+            brand_name: str = None,
+            prefix: str = None,
     ) -> list[str]:
-
+        brand_name = '' if brand_name is None else f'{brand_name}_'
         products_df = pd.DataFrame([
             {'vendor_code': product['card'].get('vendor_code'), 'product': product}
             for product in products
@@ -37,7 +38,7 @@ class CreationServices:
         output_products_df = pd.DataFrame(
             self.creation_utils.prepare_output_to_creation(products=products, price_column=price_column))
 
-        products_filename = 'cached_files/products_to_be_created' \
+        products_filename = f'cached_files/{brand_name}products_to_be_created' \
                     + '_' + \
                     str(datetime.date.today()) + '.xlsx'
 
@@ -47,7 +48,7 @@ class CreationServices:
         excluded_df = self.creation_utils.excluded_df(
             initial_df=df, products_df=products_df, article_column=article_column)
 
-        excluded_filename = 'cached_files/not_found_vendor_codes' \
+        excluded_filename = f'cached_files/{brand_name}not_found_vendor_codes' \
                     + '_' + \
                     str(datetime.date.today()) + '.xlsx'
 
