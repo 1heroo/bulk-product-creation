@@ -208,6 +208,7 @@ class CreationUtils(BaseUtils):
                         'vendor_code': product['card'].get('vendor_code', ''),
                         'product': product,
                     })
+                    break
         return pd.DataFrame(output_data)
 
 
