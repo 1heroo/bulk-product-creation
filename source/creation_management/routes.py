@@ -56,16 +56,20 @@ async def create_by_seller_id(seller_id: int, prefix_vendor_cide: str = None, fi
     return xlsx_utils.zip_response(filenames=filenames, zip_filename='products.zip')
 
 
+@router.post('/get-products-by-articles-wb/')
+async def get_products_by_articles_wb(file: bytes = File()):
+    df = pd.read_excel(file).dropna()
+    nm_id_column = df['Артикул WB'].name
+
+    products = await creation_services.creation_utils.get_detail_by_nms(nms=list(df[nm_id_column]))
+    products_df = await creation_services.prepare_to_creation_products_with_no_prices(products=products)
+    return xlsx_utils.streaming_response(df=products_df, file_name='products-by-articles-wb')
+
+
 @router.get('/get-seller-products-by-seller-id/{seller_id}/')
-async def get_seller_products_by_seller_id(seller_id: str):
+async def get_seller_products_by_seller_id(seller_id: int):
     products = await creation_services.creation_utils.get_by_seller_id(seller_id=seller_id)
-    products_df = await creation_services.prepare_to_creation_by_seller_products(products=products)
+    products_df = await creation_services.prepare_to_creation_products_with_no_prices(products=products)
 
-    output = io.BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    products_df.to_excel(writer, index=False)
-    writer.save()
+    return xlsx_utils.streaming_response(df=products_df, file_name=f'products seller {seller_id}')
 
-    return StreamingResponse(io.BytesIO(output.getvalue()),
-                             media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                             headers={'Content-Disposition': f'attachment; filename="products seller {seller_id}.xlsx"'})

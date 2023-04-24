@@ -42,7 +42,6 @@ class CreationServices:
                     + '_' + \
                     str(datetime.date.today()) + '.xlsx'
 
-        # output_products_df = output_products_df.drop_duplicates(subset=['Артикул продавца'])
         output_products_df.to_excel(products_filename, index=False)
 
         excluded_df = self.creation_utils.excluded_df(
@@ -55,9 +54,9 @@ class CreationServices:
         excluded_df.to_excel(excluded_filename, index=False)
         return [excluded_filename, products_filename]
 
-    async def prepare_to_creation_by_seller_products(self, products: list[dict]) -> pd.DataFrame:
+    async def prepare_to_creation_products_with_no_prices(self, products: list[dict]) -> pd.DataFrame:
         products = [
-            {'product': product, 'price': product['detail'].get('priceU')}
+            {'product': product, 'price': product['detail'].get('priceU', 0) // 100}
             for product in products
         ]
 

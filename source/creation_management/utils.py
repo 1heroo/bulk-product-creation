@@ -99,6 +99,23 @@ class CreationUtils(BaseUtils):
         output_data = [item for item in output_data if not isinstance(item, Exception) and item]
         return output_data
 
+    async def get_detail_by_nms(self, nms):
+        output_data = []
+        tasks = []
+
+        for index, nm in enumerate(nms, start=1):
+            task = asyncio.create_task(self.get_product_data(article=nm))
+            tasks.append(task)
+
+            if index % 50 == 0:
+                print(index, 'product data')
+                output_data += await asyncio.gather(*tasks, return_exceptions=True)
+                tasks = []
+
+        output_data += await asyncio.gather(*tasks, return_exceptions=True)
+        output_data = [item for item in output_data if not isinstance(item, Exception) and item]
+        return output_data
+
     async def get_by_seller_id(self, seller_id: int):
         url = 'https://catalog.wb.ru/sellers/catalog?curr=rub&dest=-1257786&page={page}&regions=80,64,38,4,115,83,33,68,70,69,30,86,75,40,1,66,48,110,22,31,71,114,111&sort=popular&spp=25&supplier=%s' % seller_id
         products = await self.get_catalog(url=url)

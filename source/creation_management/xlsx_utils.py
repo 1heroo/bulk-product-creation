@@ -3,7 +3,7 @@ import os
 import zipfile
 
 import pandas as pd
-from starlette.responses import Response
+from starlette.responses import Response, StreamingResponse
 
 
 class XlsxUtils:
@@ -28,59 +28,14 @@ class XlsxUtils:
         })
         return resp
 
-    def handle_xlsx(self, df: pd.DataFrame, file_name) -> pd.DataFrame:
-        index = self.search_table_begin(df=df)
-        df = df.loc[index:]
-        df.to_csv(file_name)
-
-        self.delete_first_line(filename=file_name)
-        df = pd.read_csv(file_name)
-        for column in df:
-            if 'Unnamed' in column:
-                df = df.drop(column, axis=1)
-        return df
-
     @staticmethod
-    def search_table_begin(df: pd.DataFrame):
-        article_columns = ['артикул', "Артикул", "артикулы", "Артикулы"]
-        columns = df.columns
-        for index in df.index[:100]:
-            for column in columns:
-                if df[column][index] in article_columns or column in article_columns:
-                    return index
+    def streaming_response(df: pd.DataFrame, file_name: str = 'default_output') -> StreamingResponse:
+        output = io.BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, index=False)
+        writer.save()
 
-    @staticmethod
-    def delete_first_line(filename):
-        with open(filename, "r", encoding='utf-8') as fp:
-            lines = fp.readlines()
+        return StreamingResponse(io.BytesIO(output.getvalue()),
+                                 media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                 headers={'Content-Disposition': f'attachment; filename="{file_name}.xlsx"'})
 
-        with open(filename, "w", encoding='utf-8') as fp:
-            for line in range(1, len(lines)):
-                fp.write(lines[line])
-
-    @staticmethod
-    def find_article_column(df: pd.DataFrame):
-        columns = df.columns
-
-        article_list = ['артикул', "Артикул", "Артикулы", "артикулы", 'Артикул WB']
-        for column in columns:
-            if column in article_list:
-                return column
-
-    @staticmethod
-    def find_price_column(df: pd.DataFrame):
-        columns = df.columns
-
-        price_list = ["РРЦ", "МДЦ", 'МРЦ', "РРЦ Цена", "МДЦ АКЦИЯ!", 'Цена РРЦ', 'РРЦ Wildberries, руб']
-        for column in columns:
-            if column in price_list:
-                return column
-
-    @staticmethod
-    def find_min_price_column(df: pd.DataFrame):
-        columns = df.columns
-
-        price_list = ['Минимальная цена']
-        for column in columns:
-            if column in price_list:
-                return column
