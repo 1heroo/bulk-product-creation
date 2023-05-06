@@ -12,7 +12,6 @@ class BaseUtils:
     async def make_get_request(url, headers, no_json=False):
         async with aiohttp.ClientSession(trust_env=True, headers=headers) as session:
             async with session.get(url=url) as response:
-                print(response.status)
 
                 if response.status == 200:
                     return True if no_json else json.loads(await response.text())
@@ -138,7 +137,7 @@ class CreationUtils(BaseUtils):
         return output_data
 
     @staticmethod
-    def prepare_output_to_creation(products: list[dict], price_column: str) -> list[dict]:
+    def prepare_output_to_creation(products: list[dict], price_column: str, vendor_code_column: str = None) -> list[dict]:
         output_data = []
 
         for item in products:
@@ -167,6 +166,11 @@ class CreationUtils(BaseUtils):
             else:
                 images_url = None
 
+            if vendor_code_column:
+                vendor_code = 'bland' + item.get(vendor_code_column, '')
+            else:
+                vendor_code = 'bland' + product['card'].get('vendor_code', '')
+
             obj = {
                 'Номер карточки': product['detail'].get('id'),
                 'Предмет': product['card'].get('subj_name'),
@@ -175,7 +179,7 @@ class CreationUtils(BaseUtils):
                 'Бренд': product['detail'].get('brand'),
                 'Пол': None,
                 'Название': product['detail'].get('name', '')[:60],
-                'Артикул продавца': 'bland' + product['card'].get('vendor_code', ''),
+                'Артикул продавца': vendor_code,
                 'Баркод товара': None,
                 'Цена': price,
                 'Описание': product['card'].get('description'),

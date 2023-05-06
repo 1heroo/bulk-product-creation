@@ -36,7 +36,7 @@ class CreationServices:
         print(final_df.columns)
         products = final_df.to_dict('records')
         output_products_df = pd.DataFrame(
-            self.creation_utils.prepare_output_to_creation(products=products, price_column=price_column))
+            self.creation_utils.prepare_output_to_creation(products=products, price_column=price_column, vendor_code_column=article_column))
 
         products_filename = f'cached_files/{brand_name}products_to_be_created' \
                     + '_' + \
