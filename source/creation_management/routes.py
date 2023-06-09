@@ -36,7 +36,7 @@ async def create_kts(brand_id: int, brand_name: str, file: bytes = File()):
 
 
 @router.post('/create-cards-by-seller-id/')
-async def create_by_seller_id(seller_id: int, prefix_vendor_cide: str = None, file: bytes = File()):
+async def create_by_seller_id(seller_id: int, prefix_vendor_code: str = None, file: bytes = File()):
 
     df = pd.read_excel(file)
 
@@ -51,7 +51,7 @@ async def create_by_seller_id(seller_id: int, prefix_vendor_cide: str = None, fi
 
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
-        df=df, article_column=article_column, price_column=price_column, prefix=prefix_vendor_cide)
+        df=df, article_column=article_column, price_column=price_column, prefix=prefix_vendor_code)
 
     return xlsx_utils.zip_response(filenames=filenames, zip_filename='products.zip')
 
@@ -62,6 +62,8 @@ async def get_products_by_articles_wb(file: bytes = File()):
     nm_id_column = df['Артикул WB'].name
 
     products = await creation_services.creation_utils.get_detail_by_nms(nms=list(df[nm_id_column]))
+    for product in products:
+        print(product.get('card').get('nm_id'))
     products_df = await creation_services.prepare_to_creation_products_with_no_prices(products=products)
     return xlsx_utils.streaming_response(df=products_df, file_name='products-by-articles-wb')
 

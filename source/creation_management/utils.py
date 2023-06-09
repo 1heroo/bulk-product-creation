@@ -55,7 +55,6 @@ class CreationUtils(BaseUtils):
         card_url = make_head(int(article)) + make_tail(str(article), 'info/ru/card.json')
         obj = {}
         card = await self.make_get_request(url=card_url, headers={})
-
         detail_url = f'https://card.wb.ru/cards/detail?spp=27&regions=80,64,38,4,83,33,68,70,69,30,86,75,40,1,22,66,31,48,110,71&pricemarginCoeff=1.0&reg=1&appType=1&emp=0&locale=ru&lang=ru&curr=rub&couponsGeo=12,3,18,15,21&sppFixGeo=4&dest=-455203&nm={article}'
         detail = await self.make_get_request(detail_url, headers={})
 
@@ -63,8 +62,7 @@ class CreationUtils(BaseUtils):
             detail = detail['data']['products']
         else:
             detail = {}
-        # seller_url = make_head(int(article)) + make_tail(str(article), 'sellers.json')
-        # seller_data = await self.make_get_request(seller_url, headers={})
+
         qnt_url = f'https://product-order-qnt.wildberries.ru/by-nm/?nm={article}'
         qnt = await self.make_get_request(url=qnt_url, headers={})
 
@@ -236,7 +234,6 @@ class CreationUtils(BaseUtils):
         return pd.DataFrame(output_data)
 
 
-
 def make_head(article: int):
     head = 'https://basket-{i}.wb.ru'
 
@@ -258,8 +255,10 @@ def make_head(article: int):
         number = '08'
     elif article < 131400000:
         number = '09'
-    else:
+    elif article < 160200000:
         number = '10'
+    else:
+        number = 11
     return head.format(i=number)
 
 
