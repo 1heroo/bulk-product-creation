@@ -142,6 +142,10 @@ class CreationUtils(BaseUtils):
 
         for item in products:
             product = item.get('product', {'card': {}, 'detail': {}})
+            nm_id = product['detail'].get('id')
+            if nm_id is None:
+                continue
+
             price = item.get(price_column, 0)
 
             options_dict = dict()
@@ -159,8 +163,7 @@ class CreationUtils(BaseUtils):
                 photo_count = 2 if photo_count == 1 else photo_count
 
                 images_url = '; '.join([
-                    make_head(int(product['detail'].get('id'))) + make_tail(str(product['detail'].get('id')),
-                                                                            f'images/big/{image_count}.jpg')
+                    make_head(int(nm_id)) + make_tail(str(nm_id), f'images/big/{image_count}.jpg')
                     for image_count in range(1, photo_count)
                 ])
             else:
