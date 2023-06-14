@@ -194,6 +194,12 @@ class CreationUtils(BaseUtils):
     @staticmethod
     def excluded_df(initial_df: pd.DataFrame, products_df: pd.DataFrame, article_column: str):
 
+        if initial_df.empty:
+            return products_df
+
+        if products_df.empty:
+            return initial_df
+
         return pd.merge(
             initial_df, products_df,  left_on=article_column, right_on='vendor_code', how="outer", indicator=True)\
             .query('_merge=="left_only"')
