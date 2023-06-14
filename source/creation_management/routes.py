@@ -26,7 +26,7 @@ async def create_kts(brand_id: int, brand_name: str, file: bytes = File()):
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     products = await creation_services.creation_utils.get_products(brand_ids=[brand_id])
-    print(len(products))
+    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
     products = creation_services.creation_utils.sort_products_by_sales(products=products)
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
@@ -48,6 +48,7 @@ async def create_by_seller_id(seller_id: int, prefix_vendor_code: str = None, fi
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     products = await creation_services.creation_utils.get_by_seller_id(seller_id=seller_id)
+    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
 
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
@@ -62,6 +63,8 @@ async def get_products_by_articles_wb(file: bytes = File()):
     nm_id_column = df['Артикул WB'].name
 
     products = await creation_services.creation_utils.get_detail_by_nms(nms=list(df[nm_id_column]))
+    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
+
     for product in products:
         print(product.get('card').get('nm_id'))
     products_df = await creation_services.prepare_to_creation_products_with_no_prices(products=products)
@@ -71,6 +74,8 @@ async def get_products_by_articles_wb(file: bytes = File()):
 @router.get('/get-seller-products-by-seller-id/{seller_id}/')
 async def get_seller_products_by_seller_id(seller_id: int):
     products = await creation_services.creation_utils.get_by_seller_id(seller_id=seller_id)
+    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
+
     products_df = await creation_services.prepare_to_creation_products_with_no_prices(products=products)
 
     return xlsx_utils.streaming_response(df=products_df, file_name=f'products seller {seller_id}')
