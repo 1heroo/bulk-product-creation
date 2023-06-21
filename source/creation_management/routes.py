@@ -61,12 +61,14 @@ async def create_by_seller_id(seller_id: int, prefix_vendor_code: str = None, st
 
 
 @router.post('/get-products-by-articles-wb/')
-async def get_products_by_articles_wb(file: bytes = File()):
+async def get_products_by_articles_wb(file: bytes = File(), stocks: bool = False):
     df = pd.read_excel(file).dropna()
     nm_id_column = df['Артикул WB'].name
 
     products = await creation_services.creation_utils.get_detail_by_nms(nms=list(df[nm_id_column]))
-    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
+
+    if not stocks:
+        products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
 
     for product in products:
         print(product.get('card').get('nm_id'))
