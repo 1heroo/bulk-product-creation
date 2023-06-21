@@ -15,7 +15,7 @@ creation_services = CreationServices()
 
 
 @router.post('/create-cards-by-vendor-code/')
-async def create_kts(brand_id: int, brand_name: str, file: bytes = File()):
+async def create_kts(brand_id: int, brand_name: str, stocks: bool = False, file: bytes = File()):
 
     df = pd.read_excel(file)
     article_column = df['Артикул WB'].name
@@ -26,7 +26,9 @@ async def create_kts(brand_id: int, brand_name: str, file: bytes = File()):
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     products = await creation_services.creation_utils.get_products(brand_ids=[brand_id])
-    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
+
+    if not stocks:
+        products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
     products = creation_services.creation_utils.sort_products_by_sales(products=products)
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
@@ -36,7 +38,7 @@ async def create_kts(brand_id: int, brand_name: str, file: bytes = File()):
 
 
 @router.post('/create-cards-by-seller-id/')
-async def create_by_seller_id(seller_id: int, prefix_vendor_code: str = None, file: bytes = File()):
+async def create_by_seller_id(seller_id: int, prefix_vendor_code: str = None, stocks: bool = False, file: bytes = File()):
 
     df = pd.read_excel(file)
 
@@ -48,7 +50,8 @@ async def create_by_seller_id(seller_id: int, prefix_vendor_code: str = None, fi
                             status_code=status.HTTP_400_BAD_REQUEST)
 
     products = await creation_services.creation_utils.get_by_seller_id(seller_id=seller_id)
-    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
+    if not stocks:
+        products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
 
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
@@ -72,9 +75,11 @@ async def get_products_by_articles_wb(file: bytes = File()):
 
 
 @router.get('/get-seller-products-by-seller-id/{seller_id}/')
-async def get_seller_products_by_seller_id(seller_id: int):
+async def get_seller_products_by_seller_id(seller_id: int, stocks: bool = False):
     products = await creation_services.creation_utils.get_by_seller_id(seller_id=seller_id)
-    products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
+
+    if not stocks:
+        products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
 
     products_df = await creation_services.prepare_to_creation_products_with_no_prices(products=products)
 
