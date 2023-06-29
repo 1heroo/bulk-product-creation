@@ -160,7 +160,7 @@ class CreationUtils(BaseUtils):
                 photo_count = product['card']['media'].get('photo_count', 2)
                 photo_count = 2 if photo_count == 1 else photo_count
 
-                images_url = ', '.join([
+                images_url = '; '.join([
                     make_head(int(nm_id)) + make_tail(str(nm_id), f'images/big/{image_count}.jpg')
                     for image_count in range(1, photo_count)
                 ])
