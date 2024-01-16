@@ -87,3 +87,29 @@ async def get_seller_products_by_seller_id(seller_id: int, stocks: bool = False)
 
     return xlsx_utils.streaming_response(df=products_df, file_name=f'products seller {seller_id}')
 
+
+# @router.post('/create-instantly-products/{token}/by-article-wb/')
+async def create_instantly_products(token: str, file: bytes = File()):
+    df = pd.read_excel(file)
+    nm_id_column = df['Артикул WB'].name
+
+    await creation_services.create_instantly_products(df=df, nm_id_column=nm_id_column, token=token)
+
+
+
+# @router.post('/create-set-products/')
+async def create_set_products(file: bytes = File()):
+    df = pd.read_excel(file)
+    try:
+        major_nm_id_column = df['Артикул WB 1'].name
+        minor_nm_id_column = df['Артикул WB 2'].name
+        major_price_tail = df['Хвост 1'].name
+        minor_price_tail = df['Хвост 2'].name
+    except KeyError as ex:
+        missed_column = ex.with_traceback(None)
+        return JSONResponse(content={'message': f'Колонка {missed_column} пропущен в файле'}, status_code=status.HTTP_400_BAD_REQUEST)
+
+    sequence = await creation_services.prepare_set_products(
+        df=df, major_nm_id_column=major_nm_id_column, minor_nm_id_column=minor_nm_id_column,
+        major_price_tail=major_price_tail, minor_price_tail=minor_price_tail)
+    return xlsx_utils.streaming_response(df=pd.DataFrame(sequence), file_name='set products')

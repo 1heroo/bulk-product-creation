@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from source.creation_management.utils import CreationUtils
+from source.creation_management.utils import CreationUtils, make_head, make_tail
 
 
 class CreationServices:
@@ -62,4 +62,36 @@ class CreationServices:
 
         return pd.DataFrame(
             self.creation_utils.prepare_output_to_creation(products=products, price_column='price'))
+
+    async def prepare_set_products(self, df: pd.DataFrame, major_nm_id_column, minor_nm_id_column, major_price_tail, minor_price_tail):
+        major_products_df = pd.DataFrame([
+            {'major_nm_id': product['card'].get('nm_id'), 'major_product': product}
+            for product in await self.creation_utils.get_detail_by_nms(nms=list(df[major_nm_id_column]))
+        ])
+        minor_products_df = pd.DataFrame([
+            {'minor_nm_id': product['card'].get('nm_id'), 'minor_product': product}
+            for product in await self.creation_utils.get_detail_by_nms(nms=list(df[minor_nm_id_column]))
+        ])
+
+        df = df.merge(major_products_df, how='inner', left_on=major_nm_id_column, right_on='major_nm_id') \
+            .merge(minor_products_df, how='inner', left_on=minor_nm_id_column, right_on='minor_nm_id')
+
+        output_data = []
+        for index in df.index:
+            major_product: dict = df['major_product'][index]
+            minor_product: dict = df['minor_product'][index]
+            major_tail: int = df[major_price_tail][index]
+            minor_tail: int = df[minor_price_tail][index]
+            output_data.append(
+                await self.creation_utils.prepare_set_product(
+                    major_product=major_product, minor_product=minor_product,
+                    major_tail=major_tail, minor_tail=minor_tail
+                )
+            )
+        return output_data
+
+    async def create_instantly_products(self, df: pd.DataFrame, token, nm_id_column: str):
+        products = await self.creation_utils.get_detail_by_nms(nms=list(df[nm_id_column]))
+
+
 
