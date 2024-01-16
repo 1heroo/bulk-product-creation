@@ -76,7 +76,11 @@ class CreationUtils(GPTUtils):
     async def get_all_catalogs_from_brands(self, brand_ids):
         products = []
         for brand_id in brand_ids:
-            url = 'https://catalog.wb.ru/brands/h/catalog?appType=1&brand=%s&couponsGeo=12,3,18,15,21&curr=rub&dest=-455203&emp=0&lang=ru&locale=ru&page={page}&pricemarginCoeff=1.0&reg=1&regions=80,64,38,4,83,33,68,70,69,30,86,75,40,1,66,31,48,110,22,71&sort=popular&spp=27&sppFixGeo=4' % brand_id
+            url = 'https://catalog.wb.ru/brands/e/catalog?' \
+                  'TestGroup=no_test&TestID=no_test&appType=1' \
+                  f'&brand={brand_id}&curr=rub&dest=286' \
+                  '&page={page}&sort=popular&spp=29'
+
             print(brand_id)
             products += await self.get_catalog(url=url)
         return products
