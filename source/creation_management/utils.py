@@ -1,5 +1,4 @@
 import asyncio
-import openai
 import aiohttp
 import json
 from decouple import config
