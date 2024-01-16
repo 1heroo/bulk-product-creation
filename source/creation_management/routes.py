@@ -29,7 +29,7 @@ async def create_kts(brand_id: int, brand_name: str, stocks: bool = False, file:
 
     if not stocks:
         products = [product for product in products if 'qty' in str(product['detail'].get('sizes', {}))]
-    products = creation_services.creation_utils.sort_products_by_sales(products=products)
+    # products = creation_services.creation_utils.sort_products_by_sales(products=products)
     filenames = await creation_services.prepare_to_creation_management(
         products=products,
         df=df, article_column=article_column, price_column=price_column, brand_name=brand_name)
