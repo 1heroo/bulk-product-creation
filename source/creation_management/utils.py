@@ -290,9 +290,8 @@ class CreationUtils(GPTUtils):
                 products_dict[vendorCode] = [product]
 
         for key, product_list in products_dict.items():
-            print(product_list[-1]['qnt'][0])
             output_data.append(
-                max(product_list, key=lambda item: item['qnt'][0].get('qnt', 0))
+                max(product_list, key=lambda item: item['qnt'].get('qnt', 0))
             )
         return output_data
 
